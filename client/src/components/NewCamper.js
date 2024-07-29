@@ -18,6 +18,7 @@ function NewCamper({ onAddCamper }) {
       },
       body: JSON.stringify(formData),
     }).then((r) => {
+      console.log(r)
       if (r.ok) {
         r.json().then((camper) => {
           setName("");
