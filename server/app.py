@@ -70,10 +70,19 @@ def campers_by_id(id):
     
     elif request.method == 'PATCH':
         data = request.get_json()
-        for attr, value in data.items():
-            setattr(camper, attr, value)
-        db.session.add(camper)
-        db.session.commit()
+
+        try:
+            if 'name' in data:
+                camper.name = data['name']
+            if 'age' in data:
+                camper.age = data['age']
+            db.session.add(camper)
+            db.session.commit()
+        except:
+            message_body = {
+                "errors": ['validation errors']
+            }
+            return (make_response(message_body, 400))
         
         return make_response(camper.to_dict(), 202)
     
@@ -83,9 +92,17 @@ def activities():
         activities = Activity.query.all()
         return make_response(jsonify([activity.to_dict() for activity in activities]), 200)
 
+
 @app.route('/activities/<int:id>', methods=['GET', 'DELETE'])
 def activities_by_id(id):
     activity = Activity.query.filter(Activity.id == id).first()
+
+    if not activity:
+        message_body = {
+            'error': 'Activity not found'
+        }
+
+        return make_response(message_body, 404)
 
     if request.method == 'GET':
         return make_response(activity.to_dict(), 200)
@@ -97,7 +114,7 @@ def activities_by_id(id):
             'delete_successful': True,
             'message': 'Activity deleted'
         }
-        return make_response(response_body, 200)
+        return make_response(response_body, 204)
 
 
 @app.route('/signups', methods=['POST'])
@@ -107,13 +124,17 @@ def signups():
         return make_response(jsonify([signup.to_dict() for signup in signups]))
     elif request.method == 'POST':
         data = request.get_json()
-        new_signup = Signup(
+        try:
+            new_signup = Signup(
             time = data.get('time'),
             camper_id = data.get('camper_id'),
             activity_id = data.get('activity_id')
-        )
-        db.session.add(new_signup)
-        db.session.commit()
+            )
+            db.session.add(new_signup)
+            db.session.commit()
+        except:
+            message_body = {'errors' : ['validation errors']}
+            return make_response(message_body, 400)
 
         return make_response(new_signup.to_dict(), 201)
 

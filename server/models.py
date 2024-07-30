@@ -97,6 +97,8 @@ class Signup(db.Model, SerializerMixin):
             'time': self.time,
             'camper_id': self.camper_id,
             'activity_id': self.activity_id,
+            'activity': self.activity.name,
+            'camper': self.camper.name,
         }
 
     def __repr__(self):
